@@ -1,9 +1,7 @@
 import Login from "@/app/components/Login"
 import { Row } from "antd"
 
-type Props = {}
-
-const Page = (props: Props) => {
+const Page = () => {
   return (
     <Row align={'middle'} justify={'center'}>
       <Login />

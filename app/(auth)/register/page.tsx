@@ -1,10 +1,11 @@
+'use client';
 
-type Props = {}
+import Register from "@/app/components/Register";
+import { UserRole } from "@prisma/client";
 
-const Register = (props: Props) => {
+export default function Page() {
+
   return (
-    <div>Register</div>
+    <Register type={UserRole.USER} />
   )
 }
-
-export default Register

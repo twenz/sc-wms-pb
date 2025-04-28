@@ -1,29 +1,26 @@
 'use client';
 import { Button, Col, Form, Input, Row, Typography } from 'antd';
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 type Props = object
+type LoginFormProps = {
+  username: string;
+  password: string;
+}
 
 const Login = ({ }: Props) => {
-  const router = useRouter();
+  const [form] = Form.useForm<LoginFormProps>();
   const callbackUrl = useSearchParams().get("callbackUrl") || "/dashboard";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    // e.preventDefault();
-    console.log("Form submitted", e);
+  const handleSubmit = async (e: LoginFormProps) => {
 
     if (!e.username || !e.password) {
-      // setError("Email and password are required");
       console.log("Email and password are required");
       return;
     }
 
-    // setIsLoading(true);
-    // setError("");
-
     try {
-      console.log('callbackUrl is', callbackUrl);
       const result = await signIn("credentials", {
         redirect: true,
         email: e.username,
@@ -32,17 +29,10 @@ const Login = ({ }: Props) => {
       });
 
       if (result?.error) {
-        // setError("Invalid email or password");
-        // setIsLoading(false);
         console.log("Invalid email or password");
         return;
       }
-      console.log("Login successful", result, callbackUrl);
-      // router.refresh();
-      // router.replace('/dashboard');
     } catch (error) {
-      // setError("An error occurred during sign in");
-      // setIsLoading(false);
       console.error("An error occurred during sign in", error);
     }
   };
@@ -66,7 +56,7 @@ const Login = ({ }: Props) => {
       </Col>
       <Col span={24}>
         <Row gutter={[0, 16]}>
-          <Form onFinish={handleSubmit}>
+          <Form<LoginFormProps> form={form} onFinish={handleSubmit}>
             <Col span={24}>
               <Form.Item name="username" rules={[{ required: true, message: 'Please input your username!' }]}>
                 <Input placeholder="Username" />

@@ -1,12 +1,22 @@
 'use client';
+import axiosClient from '@/libs/axios';
 import { LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
+import { User, UserRole } from '@prisma/client';
 import { Button, Card, Form, Input, message, Result } from 'antd';
-import axios from 'axios';
+import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import './style.css';
+interface SetupFormValues {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export default function SetupPage() {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<SetupFormValues>();
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -18,10 +28,14 @@ export default function SetupPage() {
 
   const checkIfSetupNeeded = async () => {
     try {
-      const response = await axios.get('/api/users');
-      setInitialized(true);
+      const admins: User[] = await axiosClient.get('/users', {
+        params: {
+          role: UserRole.ADMIN
+        }
+      }).then(res => res.data);
+      setInitialized(admins.length > 0);
     } catch (error) {
-      if (error.response?.status === 403) {
+      if (error instanceof AxiosError && error.response?.status === 403) {
         setInitialized(false);
       }
     } finally {
@@ -29,17 +43,14 @@ export default function SetupPage() {
     }
   };
 
-  const handleSetup = async (values) => {
+  const handleSetup = async (values: SetupFormValues) => {
     setLoading(true);
     try {
-      await axios.post('/api/setup', values);
+      await axiosClient.post('/setup', values);
       message.success('ตั้งค่าผู้ดูแลระบบเริ่มต้นเรียบร้อยแล้ว');
-      setTimeout(() => {
-        router.push('/');
-      }, 2000);
+      router.push('/');
     } catch (error) {
-      console.error('Setup error:', error);
-      if (error.response?.data?.error) {
+      if (error instanceof AxiosError && error.response?.data?.error) {
         message.error(error.response.data.error);
       } else {
         message.error('เกิดข้อผิดพลาดในการตั้งค่าเริ่มต้น');
@@ -51,7 +62,7 @@ export default function SetupPage() {
 
   if (checking) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="flex-center-container">
         <p>กำลังตรวจสอบสถานะระบบ...</p>
       </div>
     );
@@ -73,9 +84,9 @@ export default function SetupPage() {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <div className="flex-center-container">
       <Card title="ตั้งค่าผู้ดูแลระบบเริ่มต้น" style={{ width: 500 }}>
-        <Form
+        <Form<SetupFormValues>
           form={form}
           layout="vertical"
           onFinish={handleSetup}

@@ -1,12 +1,12 @@
 // app/api/auth/[...nextauth]/route.ts
 import prisma from "@/libs/prisma";
 import { compare } from "bcrypt";
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     // OAuth providers
     GoogleProvider({
@@ -30,29 +30,6 @@ export const authOptions = {
         }
 
         try {
-          // Here you would typically validate against your database
-          // This is a placeholder for demonstration
-          // if (credentials.email === "admin@sc-wms.com" && credentials.password === "admin123") {
-          //   return {
-          //     id: "1",
-          //     name: "Admin User",
-          //     email: "admin@sc-wms.com",
-          //     role: "admin",
-          //     image: "https://placehold.co/100x100"
-          //   };
-          // }
-
-          // For citizen users
-          // if (credentials.email === "citizen@example.com" && credentials.password === "citizen123") {
-          //   return {
-          //     id: "2",
-          //     name: "Citizen User",
-          //     email: "citizen@example.com",
-          //     role: "citizen",
-          //     image: "https://placehold.co/100x100"
-          //   };
-          // }
-
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email
@@ -84,7 +61,6 @@ export const authOptions = {
     async jwt({ token, user, account }) {
       // Add role to token after sign in
       if (user) {
-        console.log("🚀 ~ jwt ~ user:", user)
         token.role = user.role;
         token.id = user.id;
       }
@@ -97,7 +73,6 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      console.log(`🚀 ~ session ~ { session, token }:`, { session, token })
       // Add role to session
       if (session.user) {
         session.user.role = token.role;
@@ -105,8 +80,7 @@ export const authOptions = {
       }
 
       // Add access token to session
-      session.accessToken = token.accessToken;
-      session.token = token.accessToken;
+      // session.accessToken = token.accessToken;
 
       return session;
     },
