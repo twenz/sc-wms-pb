@@ -1,8 +1,13 @@
+'use client';
+import { Row } from "antd";
 
-export default function Home() {
+const Page = () => {
   return (
-    <div>
+    <Row align={'middle'} justify={'center'}>
+      {/* <Login /> */}
       Main Page
-    </div>
+    </Row>
   );
-}
+};
+
+export default Page;
