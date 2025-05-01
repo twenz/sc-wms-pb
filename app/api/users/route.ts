@@ -1,13 +1,14 @@
-import { ApiError, apiHandler, errorMessages } from "@/libs/api-utils";
+import { ApiError, apiHandler, checkAuth, errorMessages } from "@/libs/api-utils";
 import { prisma } from "@/libs/prisma";
 import { Prisma, UserRole } from "@prisma/client";
-import { hash } from "bcrypt";
-import { getServerSession } from "next-auth";
+import { genSalt, hash, } from "bcrypt";
 import { NextRequest } from "next/server";
+
+const secret = process.env.NEXT_SALT
 
 export async function GET() {
   return apiHandler(async () => {
-    const sesion = await getServerSession();;
+    const sesion = await checkAuth();
     if (sesion?.user.role != UserRole.ADMIN) {
       throw new ApiError(403, errorMessages.forbidden);
     }
@@ -53,7 +54,8 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, `${errorMessages.duplicate} ${duplicateMessage}`);
     }
 
-    const hashedPassword = await hash(data.password, process.env.NEXT_SALT);
+    const salt = await genSalt(parseInt(secret as string))
+    const hashedPassword = await hash(data.password, salt);
 
     const role = await prisma.role.findFirst({
       where: {

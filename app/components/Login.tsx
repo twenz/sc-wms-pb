@@ -12,9 +12,9 @@ type LoginFormProps = {
 }
 
 const Login = ({ }: Props) => {
-  const [form] = Form.useForm<LoginFormProps>();
   const callbackUrl = useSearchParams().get("callbackUrl") || "/dashboard";
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm<LoginFormProps>();
   const { message } = App.useApp();
   const { status } = useSession()
 
@@ -27,12 +27,15 @@ const Login = ({ }: Props) => {
       return;
     }
     try {
+      console.log('e :> ', e)
+      debugger
       const result = await signIn("credentials", {
         redirect: false,
         username: e.username,
         password: e.password,
         callbackUrl: callbackUrl,
       });
+      debugger
       if (result?.error) {
         message.error(result.error);
         setLoading(false);

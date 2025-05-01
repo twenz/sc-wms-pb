@@ -1,12 +1,11 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/libs/prisma";
 import bcrypt from "bcrypt";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import { authOptions } from "../../auth/[...nextauth]/route";
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
 
     if (!session) {
       return NextResponse.json(
@@ -48,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     // เข้ารหัสและบันทึกรหัสผ่านใหม่
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, process.env.NEXT_SALT);
 
     await prisma.user.update({
       where: { id: session.user.id },

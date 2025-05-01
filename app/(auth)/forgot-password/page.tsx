@@ -1,7 +1,7 @@
 
-type Props = {}
+type Props = object
 
-const ForgotPassword = (props: Props) => {
+const ForgotPassword = ({ }: Props) => {
   return (
     <div>ForgotPassword</div>
   )

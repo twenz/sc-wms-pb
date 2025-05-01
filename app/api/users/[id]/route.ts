@@ -2,11 +2,20 @@ import { ApiError, apiHandler, checkAuth, errorMessages } from "@/libs/api-utils
 import { prisma } from "@/libs/prisma";
 import { NextRequest } from "next/server";
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+// Define the correct params type for Next.js route handlers
+type Params = Promise<{ id: string }>
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
   return apiHandler(async () => {
     const session = await checkAuth();
-    const userId = params.id;
+    const userId = (await params).id;
+    // console.log("🚀 ~ context:", await params)
 
+    // if (!session) throw new ApiError(403, errorMessages.forbidden);
+    // if (!userId) {
     if (session.user.role !== "admin" && session.user.id !== userId) {
       throw new ApiError(403, errorMessages.forbidden);
     }
@@ -32,10 +41,13 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
   return apiHandler(async () => {
     const session = await checkAuth();
-    const userId = params.id;
+    const userId = (await params).id;
 
     if (session.user.role !== "admin" && session.user.id !== userId) {
       throw new ApiError(403, errorMessages.forbidden);
@@ -50,8 +62,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       ...(name && { name }),
       ...(email && { email }),
       ...(image && { image }),
-      // ...(password && { password: await hash(password, 12) }),
-      // ...(session.user.role === "admin" && role && { role })
     };
 
     return await prisma.user.update({
@@ -70,10 +80,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   });
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
   return apiHandler(async () => {
     const session = await checkAuth('admin');
-    const userId = params.id;
+    const userId = (await params).id;
 
     if (session.user.id === userId) {
       throw new ApiError(400, 'ไม่สามารถลบบัญชีของตัวเองได้');

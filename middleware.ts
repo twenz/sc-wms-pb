@@ -6,15 +6,16 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Define public paths that don't require authentication
-  const publicPaths = ["/", "/login", "/register", "/forgot-password", "/setup"];
-  const isPublicPath = publicPaths.includes(path);
+  const publicApi = ['/api/users']
+  const publicPaths = ["/", "/login", "/register", "/forgot-password", "/setup", ...publicApi];
+  const isPublicPath = publicPaths.includes(path) && !path.startsWith("/api/restricted")
 
   // Check if the path is for API routes or public assets
-  const isApiPath = path.startsWith("/api") && !path.startsWith("/api/restricted");
+  // const isApiPath = path.startsWith("/api") && !path.startsWith("/api/restricted");
   const isStaticPath = path.startsWith("/_next") || path.includes(".");
 
-  if (isPublicPath || isApiPath || isStaticPath) {
-    console.log("Public path or API route, no authentication required:", path);
+  if (isPublicPath || isStaticPath) {
+    // console.log("Public path or API route, no authentication required:", path, isPublicPath);
     return NextResponse.next();
   }
 
@@ -52,6 +53,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/auth).*)",
   ],
 };

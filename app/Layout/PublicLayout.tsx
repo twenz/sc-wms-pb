@@ -1,7 +1,7 @@
 
-type Props = {}
+type Props = object
 
-const PublicLayout = (props: Props) => {
+const PublicLayout = ({ }: Props) => {
   return (
     <div>PublicLayout</div>
   )

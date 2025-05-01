@@ -1,7 +1,7 @@
 
-type Props = {}
+type Props = object
 
-const ProtectLayout = (props: Props) => {
+const ProtectLayout = ({ }: Props) => {
   return (
     <div>ProtectLayout</div>
   )

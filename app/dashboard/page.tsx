@@ -1,7 +1,14 @@
+'use client'
 
-type Props = {}
+import { useSession } from "next-auth/react"
 
-const Page = (props: Props) => {
+
+type Props = object
+
+const Page = ({ }: Props) => {
+  const { status, data } = useSession()
+  console.log("🚀 ~ Page ~ data:", data, status)
+
   return (
     <div>Page</div>
   )
