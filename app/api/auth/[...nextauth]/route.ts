@@ -21,18 +21,33 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null;
         }
 
         try {
-          const user = await prisma.user.findUnique({
+          const user = await prisma.user.findFirst({
             where: {
-              email: credentials.email
+              OR: [
+                { email: credentials.username },
+                { phone: credentials.username }
+              ]
+            },
+            include: {
+              role: {
+                select: {
+                  name: true,
+                  permissions: {
+                    select: {
+                      name: true
+                    }
+                  }
+                },
+              },
             }
           })
           if (!user || !user.password) {
@@ -42,12 +57,25 @@ export const authOptions: AuthOptions = {
           if (!isPasswordValid) {
             return null
           }
+          // console.log("🚀 ~ authorize ~ user:", user)
+          if (!user.role) {
+            // throw new Error("User role not found");
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: '',
+              permissions: '',
+              organization: user.organization
+            }
+          }
 
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            role: user.role?.name,
+            permissions: user.role?.permissions.map((permission) => permission.name),
             organization: user.organization
           }
         } catch (error) {
@@ -61,6 +89,7 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, account }) {
       // Add role to token after sign in
       if (user) {
+        // console.log("🚀 ~ jwt ~ user:", user)
         token.role = user.role;
         token.id = user.id;
       }
@@ -75,6 +104,7 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       // Add role to session
       if (session.user) {
+        // console.log("🚀 ~ session ~ token:", token)
         session.user.role = token.role;
         session.user.id = token.id;
       }
@@ -83,6 +113,10 @@ export const authOptions: AuthOptions = {
       // session.accessToken = token.accessToken;
 
       return session;
+    },
+    async signIn(params) {
+      const hasRole = params.user?.role;
+      return !!hasRole;
     },
   },
   pages: {

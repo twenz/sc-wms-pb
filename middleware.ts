@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
-  console.log("🚀 ~ middleware ~ token:", token)
+  // console.log("🚀 ~ middleware ~ token:", token)
 
   // Redirect to login if no token and accessing protected route
   if (!token) {
@@ -39,7 +39,7 @@ export async function middleware(req: NextRequest) {
   // if (path.startsWith("/dashboard/admin") && token.role !== "admin") {
   //   return NextResponse.redirect(new URL("/dashboard", req.url));
   // }
-  console.log("Token found:", token);
+  // console.log("Token found:", token);
   return NextResponse.next();
 }
 

@@ -3,11 +3,11 @@
 import axiosClient from '@/libs/axios';
 import { LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { UserRole } from '@prisma/client';
-import { Button, Card, Col, Form, Input, Row, Typography, message } from 'antd';
+import { App, Button, Card, Col, Form, Input, Row, Typography } from 'antd';
 import { AxiosError } from 'axios';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface RegisterFormValues {
   name: string;
@@ -25,6 +25,8 @@ export default function Register({ type = UserRole.USER }: Props) {
   const [form] = Form.useForm<RegisterFormValues>();
   const router = useRouter();
   const session = useSession()
+  const [loading, setLoading] = useState(false)
+  const { message } = App.useApp()
 
   useEffect(() => {
     if (session.status === 'authenticated') {
@@ -36,18 +38,23 @@ export default function Register({ type = UserRole.USER }: Props) {
 
 
   const handleSubmit = async (values: RegisterFormValues) => {
+    if (loading) return
+    setLoading(true)
     try {
       await axiosClient.post('/users', {
         name: values.name,
         email: values.email,
         phone: values.phone,
-        password: values.password
+        password: values.password,
       });
 
       message.success('Registration successful');
+      setLoading(false)
       router.push('/login');
     } catch (error: unknown) {
+      setLoading(false)
       if (error instanceof AxiosError) {
+        message.error(error.response?.data?.error)
         console.log(error.response?.data?.error)
       }
     }

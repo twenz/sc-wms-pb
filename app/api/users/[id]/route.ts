@@ -1,6 +1,5 @@
-import { ApiError, apiHandler, checkAuth, errorMessages } from "@/lib/api-utils";
-import { prisma } from "@/lib/prisma";
-import { hash } from "bcrypt";
+import { ApiError, apiHandler, checkAuth, errorMessages } from "@/libs/api-utils";
+import { prisma } from "@/libs/prisma";
 import { NextRequest } from "next/server";
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
@@ -42,19 +41,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       throw new ApiError(403, errorMessages.forbidden);
     }
 
-    const { name, email, password, role, image } = await request.json();
+    const { name, email, image } = await request.json();
     const updateData: Partial<{
       name: string;
-      email: string;
       image: string;
-      password: string;
-      role: string;
+
     }> = {
       ...(name && { name }),
       ...(email && { email }),
       ...(image && { image }),
-      ...(password && { password: await hash(password, 12) }),
-      ...(session.user.role === "admin" && role && { role })
+      // ...(password && { password: await hash(password, 12) }),
+      // ...(session.user.role === "admin" && role && { role })
     };
 
     return await prisma.user.update({

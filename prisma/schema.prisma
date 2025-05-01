@@ -37,21 +37,36 @@ model Session {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  name           String?
-  email          String?   @unique
-  emailVerified  DateTime? @map("email_verified")
-  image          String?
-  password      String?
-  // hashedPassword String?   @map("hashed_password")
-  phone          String    @unique
-  role           UserRole  @default(USER)
-  organization   String?
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id            String    @id @default(cuid()) @unique
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  password      String
+  phone         String    @unique
+  role          Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  roleId        String?   @map("role_id")
+  organization  String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  userInfo      UserInfo?
+  userInfoId    String?   @map("user_info_id")
 
-  accounts Account[]
-  sessions Session[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model UserInfo {
+  id        String  @id @default(cuid())
+  userId    String  @unique @map("user_id")
+  firstName String  @map("first_name")
+  lastName  String  @map("last_name")
+  address   String?
+  city      String?
+  state     String?
+  country   String?
+  zip       String?
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -60,6 +75,19 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        UserRole     @unique @default(USER)
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id   String @id @default(cuid())
+  name String @unique
+  role Role[]
 }
 
 enum UserRole {

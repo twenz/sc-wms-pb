@@ -1,7 +1,9 @@
 'use client';
-import { Button, Col, Form, Input, Row, Typography } from 'antd';
-import { signIn } from "next-auth/react";
-import { useSearchParams } from 'next/navigation';
+import { App, Button, Col, Form, Input, Row, Skeleton, Typography } from 'antd';
+import { signIn, useSession } from "next-auth/react";
+import Link from 'next/link';
+import { redirect, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 type Props = object
 type LoginFormProps = {
@@ -12,30 +14,44 @@ type LoginFormProps = {
 const Login = ({ }: Props) => {
   const [form] = Form.useForm<LoginFormProps>();
   const callbackUrl = useSearchParams().get("callbackUrl") || "/dashboard";
+  const [loading, setLoading] = useState(false);
+  const { message } = App.useApp();
+  const { status } = useSession()
 
   const handleSubmit = async (e: LoginFormProps) => {
+    if (loading) return
+    setLoading(true);
 
     if (!e.username || !e.password) {
       console.log("Email and password are required");
       return;
     }
-
     try {
       const result = await signIn("credentials", {
-        redirect: true,
-        email: e.username,
+        redirect: false,
+        username: e.username,
         password: e.password,
         callbackUrl: callbackUrl,
       });
-
       if (result?.error) {
-        console.log("Invalid email or password");
+        message.error(result.error);
+        setLoading(false);
         return;
       }
+      setLoading(false);
+      redirect(result?.url || callbackUrl);
     } catch (error) {
+      setLoading(false)
       console.error("An error occurred during sign in", error);
     }
   };
+
+  if (status === "authenticated") {
+    redirect(callbackUrl);
+  }
+  if (status === "loading") {
+    return <Skeleton />
+  }
 
   return (
     <Row justify="center" align="middle" gutter={[16, 16]} style={{ maxWidth: '400px', maxHeight: '400px', padding: '16px' }} >
@@ -75,7 +91,7 @@ const Login = ({ }: Props) => {
               </Form.Item>
             </Col>
             <Col span={24} style={{ textAlign: "center" }}>
-              Register / ForgotPassword
+              <Link href={'/register'}>Register</Link> / <Link href={'/forgot-password'}>Forgot Password</Link>
             </Col>
           </Form>
         </Row>

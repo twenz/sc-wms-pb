@@ -37,14 +37,28 @@ export async function POST(request: Request) {
       );
     }
     // เข้ารหัสรหัสผ่าน
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, process.env.NEXT_SALT);
     // สร้างผู้ใช้ใหม่
+    // ตั้งค่า role เป็น admin
+    const role = await prisma.role.findUnique({
+      where: { name: UserRole.ADMIN },
+    });
+    if (!role) {
+      return NextResponse.json(
+        { error: 'ไม่พบ admin ในระบบ' },
+        { status: 500 }
+      );
+    }
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: UserRole.ADMIN, // ตั้งค่าเป็น admin
+        role: {
+          connect: {
+            id: role.id
+          }
+        },
         phone: phone, // Add required phone field with empty string
       },
     });

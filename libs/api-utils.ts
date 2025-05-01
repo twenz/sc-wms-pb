@@ -36,7 +36,6 @@ export const apiHandler = async <T>(handler: () => Promise<T>) => {
     const result = await handler();
     return NextResponse.json(result);
   } catch (error) {
-    console.error('API Error:', error);
 
     if (error instanceof ApiError) {
       return NextResponse.json(
