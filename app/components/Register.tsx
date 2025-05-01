@@ -5,7 +5,9 @@ import { LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-de
 import { UserRole } from '@prisma/client';
 import { Button, Card, Col, Form, Input, Row, Typography, message } from 'antd';
 import { AxiosError } from 'axios';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface RegisterFormValues {
   name: string;
@@ -22,6 +24,16 @@ type Props = {
 export default function Register({ type = UserRole.USER }: Props) {
   const [form] = Form.useForm<RegisterFormValues>();
   const router = useRouter();
+  const session = useSession()
+
+  useEffect(() => {
+    if (session.status === 'authenticated') {
+      const isSignOut = confirm('You are already logged in. Do you want to log out?')
+      if (isSignOut) signOut()
+      else router.push('/')
+    }
+  }, [session.status, router]);
+
 
   const handleSubmit = async (values: RegisterFormValues) => {
     try {
