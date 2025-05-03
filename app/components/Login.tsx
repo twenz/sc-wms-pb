@@ -27,15 +27,12 @@ const Login = ({ }: Props) => {
       return;
     }
     try {
-      console.log('e :> ', e)
-      debugger
       const result = await signIn("credentials", {
         redirect: false,
         username: e.username,
         password: e.password,
         callbackUrl: callbackUrl,
       });
-      debugger
       if (result?.error) {
         message.error(result.error);
         setLoading(false);
