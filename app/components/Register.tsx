@@ -41,7 +41,7 @@ export default function Register({ type = UserRole.USER }: Props) {
     if (loading) return
     setLoading(true)
     try {
-      await axiosClient.post('/users', {
+      await axiosClient.post('/register', {
         name: values.name,
         email: values.email,
         phone: values.phone,

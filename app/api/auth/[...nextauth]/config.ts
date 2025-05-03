@@ -18,9 +18,10 @@ export const authOptions: AuthOptions = {
     }),
     // Credentials provider for email/password login
     CredentialsProvider({
+      type: 'credentials',
       name: "Credentials",
       credentials: {
-        username: { label: "Email", type: "email" },
+        username: { label: "Username", type: "username" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
@@ -29,7 +30,6 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-
           const user = await prisma.user.findFirst({
             where: {
               OR: [
@@ -85,9 +85,9 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
+      // console.log("🚀 ~ jwt ~ user:", user)
       // Add role to token after sign in
       if (user) {
-        // console.log("🚀 ~ jwt ~ user:", user)
         token.role = user.role;
         token.id = user.id;
       }
@@ -100,9 +100,9 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      // console.log("🚀 ~ session ~ token:", token)
       // Add role to session
       if (session.user) {
-        // console.log("🚀 ~ session ~ token:", token)
         session.user.role = token.role;
         session.user.id = token.id;
       }
@@ -114,6 +114,9 @@ export const authOptions: AuthOptions = {
     },
     async signIn(params) {
       const hasRole = params.user?.role;
+      if (!hasRole) {
+        throw new Error('User role not found')
+      }
       return !!hasRole;
     },
   },

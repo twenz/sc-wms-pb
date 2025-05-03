@@ -1,4 +1,5 @@
 'use client';
+import { errorMessages } from '@/libs/api-utils';
 import { App, Button, Col, Form, Input, Row, Skeleton, Typography } from 'antd';
 import { signIn, useSession } from "next-auth/react";
 import Link from 'next/link';
@@ -34,7 +35,8 @@ const Login = ({ }: Props) => {
         callbackUrl: callbackUrl,
       });
       if (result?.error) {
-        message.error(result.error);
+        if (result?.error === "CredentialsSignin") message.error(errorMessages.invalidData)
+        else message.error(result.error);
         setLoading(false);
         return;
       }
