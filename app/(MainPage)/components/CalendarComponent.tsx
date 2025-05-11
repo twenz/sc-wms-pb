@@ -24,6 +24,12 @@ const styles = {
   } as CSSProperties,
 };
 
+const minTime = new Date();
+minTime.setHours(8, 0, 0); // 08:00
+
+const maxTime = new Date();
+maxTime.setHours(18, 0, 0); // 18:00
+
 export default function MyCalendar({ events: initEvent }: CalendarProps) {
   const { token } = theme.useToken();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,6 +88,8 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
           onSelectSlot={handleSelectSlot}
           style={{ height: '100%' }}
           views={['month', 'week', 'day']}
+          min={minTime}
+          max={maxTime}
         />
       </div>
 

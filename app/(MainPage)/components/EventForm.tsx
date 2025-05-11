@@ -42,7 +42,8 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
         <DatePicker
           showTime
           format="YYYY-MM-DD HH:mm"
-          style={{ width: '100%' }}
+          style={{ width: '100%', pointerEvents: 'none' }}
+          inputReadOnly
         />
       </Form.Item>
 
@@ -64,8 +65,8 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
         <DatePicker
           showTime
           format="YYYY-MM-DD HH:mm"
-          changeOnBlur
-          style={{ width: '100%' }}
+          style={{ width: '100%', pointerEvents: 'none' }}
+          inputReadOnly
         />
       </Form.Item>
     </Form>
