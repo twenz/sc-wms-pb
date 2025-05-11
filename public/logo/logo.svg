@@ -1,0 +1,26 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="48" fill="#2196F3"/>
+  
+  <!-- Calendar Top -->
+  <rect x="30" y="25" width="40" height="45" rx="4" fill="white"/>
+  
+  <!-- Calendar Dots -->
+  <circle cx="40" cy="20" r="2" fill="white"/>
+  <circle cx="60" cy="20" r="2" fill="white"/>
+  
+  <!-- Calendar Header Line -->
+  <line x1="30" y1="35" x2="70" y2="35" stroke="#2196F3" stroke-width="2"/>
+  
+  <!-- Check Mark -->
+  <!-- <path d="M38 45 L45 52 L62 35" stroke="#2196F3" stroke-width="3" fill="none"/> -->
+  
+  <!-- Calendar Lines -->
+  <!-- <line x1="35" y1="42" x2="65" y2="42" stroke="#E3F2FD" stroke-width="1"/>
+  <line x1="35" y1="48" x2="65" y2="48" stroke="#E3F2FD" stroke-width="1"/>
+  <line x1="35" y1="54" x2="65" y2="54" stroke="#E3F2FD" stroke-width="1"/> -->
+  
+  <!-- Time Icon -->
+  <circle cx="65" cy="65" r="12" fill="#4CAF50"/>
+  <path d="M65 57 L65 65 L70 68" stroke="white" stroke-width="2" fill="none"/>
+</svg>
