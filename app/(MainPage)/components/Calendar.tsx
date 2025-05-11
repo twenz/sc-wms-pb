@@ -24,11 +24,13 @@ import MyCalendar from "./CalendarComponent";
 const Calendar: React.FC = () => {
   const [events] = useState([
     {
+      id: '1',
       title: 'Meeting',
       start: new Date(2024, 4, 15, 10, 0),
       end: new Date(2024, 4, 15, 11, 30),
     },
     {
+      id: '2',
       title: 'Lunch',
       start: new Date(2024, 4, 15, 12, 0),
       end: new Date(2024, 4, 15, 13, 0),
