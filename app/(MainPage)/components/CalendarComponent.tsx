@@ -12,15 +12,15 @@ import { EventForm } from './EventForm';
 
 const styles = {
   calendar: {
-    height: '500px',
-    padding: '24px',
+    height: '100%',
+    padding: '1rem',
     backgroundColor: '#fff',
     borderRadius: '8px',
     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
   } as CSSProperties,
   container: {
-    minHeight: '100vh',
-    padding: '24px',
+    height: '80vh',
+    padding: '1rem',
   } as CSSProperties,
 };
 
@@ -81,6 +81,7 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
           onSelectEvent={handleSelectEvent}
           onSelectSlot={handleSelectSlot}
           style={{ height: '100%' }}
+          views={['month', 'week', 'day']}
         />
       </div>
 

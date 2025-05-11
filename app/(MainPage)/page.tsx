@@ -42,7 +42,7 @@ const Page = () => {
         </Row>
       </Header>
 
-      <Content style={{ padding: '50px' }}>
+      <Content style={{ padding: '1rem' }}>
         {/* Hero Section */}
         {/* <Row justify="center" style={{ marginBottom: '50px' }}>
           <Col span={16} style={{ textAlign: 'center' }}>
