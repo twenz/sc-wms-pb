@@ -39,7 +39,7 @@ const Calendar: React.FC = () => {
   ])
   return (
     <Row justify={'center'} align={'middle'}>
-      <h1>TOAST UI Calendar with Next.js & TypeScript</h1>
+      <h1>Power by Big Calendar</h1>
       <CalendarComponent events={events} />
     </Row>
   );

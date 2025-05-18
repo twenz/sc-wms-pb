@@ -4,6 +4,7 @@ import { Button, Card, Col, Layout, Menu, Row, Typography } from "antd";
 import Image from 'next/image';
 import Link from 'next/link';
 import Calendar from './components/Calendar';
+import WidgetComponent from './components/WidgetComponent';
 
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
@@ -20,15 +21,15 @@ const Page = () => {
     <Layout className="min-h-screen">
       <Header style={{ background: '#fff', padding: '0 50px' }}>
         <Row justify="space-between" align="middle">
-          <Col>
-            <Image
-              src="logo/logo.svg"
-              alt="Logo"
-              width={120}
-              height={40}
-              priority
-            />
-          </Col>
+          {/* <Col> */}
+          <Image
+            src="logo/logo.svg"
+            alt="Logo"
+            width={120}
+            height={40}
+            priority
+          />
+          {/* </Col> */}
           <Col flex="auto">
             <Menu mode="horizontal" items={menuItems} />
           </Col>
@@ -43,41 +44,12 @@ const Page = () => {
       </Header>
 
       <Content style={{ padding: '1rem' }}>
-        {/* Hero Section */}
-        {/* <Row justify="center" style={{ marginBottom: '50px' }}>
-          <Col span={16} style={{ textAlign: 'center' }}>
-            <Title level={2}>จองคิวออนไลน์</Title>
-            <Button type="primary" size="large">
-              จองคิวทันที
-            </Button>
-          </Col>
-        </Row> */}
-
-        {/* Quick Actions */}
-        {/* <Row gutter={[24, 24]} justify="center" style={{ marginBottom: '50px' }}>
-          <Col xs={24} sm={12} md={8}>
-            <Card hoverable>
-              <Row justify="center" align="middle" gutter={[16, 16]}>
-                <ClockCircleOutlined style={{ fontSize: '24px' }} />
-                <Title level={4}>ตรวจสอบคิว</Title>
-              </Row>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8}>
-            <Card hoverable>
-              <Row justify="center" align="middle" gutter={[16, 16]}>
-                <CalendarOutlined style={{ fontSize: '24px' }} />
-                <Title level={4}>ดูตารางแพทย์</Title>
-              </Row>
-            </Card>
-          </Col>
-        </Row> */}
-        <Row gutter={[16, 16]} justify="space-between" style={{}}>
-          <Col xs={24} sm={12} md={16}>
+        <Row className='calendar-widget' gutter={[16, 16]} justify="space-between" style={{}}>
+          <Col className='calendar' xs={24} sm={12} md={16}>
             <Calendar />
           </Col>
-          <Col xs={24} sm={12} md={8}>
-            asd
+          <Col className='widget' xs={24} sm={12} md={8}>
+            <WidgetComponent />
           </Col>
         </Row>
 
