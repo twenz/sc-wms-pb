@@ -27,14 +27,14 @@ const Calendar: React.FC = () => {
     {
       id: '1',
       title: 'Meeting',
-      start: new Date(2024, 4, 15, 10, 0),
-      end: new Date(2024, 4, 15, 11, 30),
+      start: new Date(2025, 4, 15, 10, 0),
+      end: new Date(2025, 4, 15, 11, 30),
     },
     {
       id: '2',
       title: 'Lunch',
-      start: new Date(2024, 4, 15, 12, 0),
-      end: new Date(2024, 4, 15, 13, 0),
+      start: new Date(2025, 4, 15, 12, 0),
+      end: new Date(2025, 4, 15, 13, 0),
     },
   ])
   return (
