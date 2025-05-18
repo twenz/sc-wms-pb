@@ -1,7 +1,8 @@
 'use client'
 
+import { Row } from "antd";
 import React, { useState } from "react";
-import MyCalendar from "./CalendarComponent";
+import CalendarComponent from "./CalendarComponent";
 // import CalendarComponent from "./CalendarComponent";
 
 // const CalendarComponent = dynamic(() => import('./CalendarComponent'), {
@@ -37,10 +38,10 @@ const Calendar: React.FC = () => {
     },
   ])
   return (
-    <div>
+    <Row justify={'center'} align={'middle'}>
       <h1>TOAST UI Calendar with Next.js & TypeScript</h1>
-      <MyCalendar events={events} />
-    </div>
+      <CalendarComponent events={events} />
+    </Row>
   );
 };
 

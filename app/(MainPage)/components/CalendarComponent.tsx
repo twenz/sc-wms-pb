@@ -1,7 +1,7 @@
 'use client';
 
 import { CalendarProps, Event, EventFormValues } from '@/types/calendar';
-import { Form, Skeleton, theme } from 'antd';
+import { Form, Skeleton } from 'antd';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import dayjs from 'dayjs';
@@ -24,6 +24,7 @@ const styles = {
     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
   } as CSSProperties,
   container: {
+    width: '100%',
     height: '80vh',
     padding: '1rem',
   } as CSSProperties,
@@ -36,7 +37,6 @@ const maxTime = new Date();
 maxTime.setHours(18, 0, 0); // 18:00
 
 export default function MyCalendar({ events: initEvent }: CalendarProps) {
-  const { token } = theme.useToken();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -141,15 +141,9 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
   }, [mode, selectedEvent, handleCancel]);
 
   if (status === 'loading') return <Skeleton />;
-  console.log("🚀 ~ MyCalendar ~ isAdmin:", isAdmin)
 
   return (
     <div style={styles.container}>
-      {!isAdmin && (
-        <div style={{ marginBottom: '1rem', color: token.colorTextSecondary }}>
-          View-only calendar. Contact an administrator for changes.
-        </div>
-      )}
       <div style={styles.calendar}>
         <DnDCalendar
           localizer={localizer}
