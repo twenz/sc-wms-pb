@@ -69,6 +69,7 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
       title: event.title,
       start: dayjs(event.start),
       end: dayjs(event.end),
+      description: event.description,
     });
     setIsModalOpen(true);
   }, [isAdmin, form]);
@@ -116,11 +117,12 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
 
   const handleSubmit = useCallback((values: EventFormValues) => {
     if (mode === 'create') {
-      const newEvent = {
+      const newEvent: Event = {
         id: crypto.randomUUID(),
         title: values.title,
         start: values.start.toDate(),
         end: values.end.toDate(),
+        description: values.description,
       };
       setEvents(prevEvents => [...prevEvents, newEvent]);
     } else {
@@ -132,6 +134,7 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
               title: values.title,
               start: values.start.toDate(),
               end: values.end.toDate(),
+              description: values.description,
             }
             : event
         )

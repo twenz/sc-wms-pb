@@ -6,6 +6,7 @@ export interface Event {
   title: string;
   start: Date;
   end: Date;
+  description?: string;
 }
 
 export interface DragEvent {
@@ -13,12 +14,14 @@ export interface DragEvent {
   start: Date;
   end: Date;
   isAllDay?: boolean;
+  description?: string;
 }
 
 export interface EventFormValues {
   title: string;
   start: Dayjs;
   end: Dayjs;
+  description?: string;
 }
 
 export type EventMode = 'create' | 'edit';

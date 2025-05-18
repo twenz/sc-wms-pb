@@ -11,7 +11,7 @@ interface EventFormProps {
 }
 
 export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProps) => {
-  console.log("🚀 ~ EventForm ~ mode:", mode)
+  console.log("🚀 ~ EventForm ~ mode:", { mode, initialValues })
   const [events, setEvents] = useState(initialValues || []);
   useEffect(() => {
     setEvents(initialValues || []);
@@ -58,6 +58,7 @@ export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProp
       initialValues={events}
     >
       <Form.Item
+        id='title'
         name="title"
         label="Event Title"
         rules={[{ required: true, message: 'Please enter event title' }]}
@@ -66,6 +67,7 @@ export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProp
       </Form.Item>
 
       <Form.Item
+        id='start'
         name="start"
         label="Start Time"
         rules={[{ required: true, message: 'Please select start time' }]}
@@ -83,6 +85,7 @@ export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProp
       </Form.Item>
 
       <Form.Item
+        id='end'
         name="end"
         label="End Time"
         rules={[
@@ -107,6 +110,12 @@ export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProp
           style={{ width: '100%' }}
         // onChange={(value) => handleTimeChange('end', value)}
         />
+      </Form.Item>
+      <Form.Item id='description' name='description' label='Event Description'>
+        <Input.TextArea
+          placeholder='Enter event description, max 256 characters'
+          autoSize={{ minRows: 4, maxRows: 4 }}
+          maxLength={256} />
       </Form.Item>
     </Form>
   );
