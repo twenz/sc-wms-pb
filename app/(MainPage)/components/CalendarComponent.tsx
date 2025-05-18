@@ -1,12 +1,13 @@
 'use client';
 
-import { CalendarProps, Event, EventFormValues } from '@/types/calendar';
+import { useEvents } from '@/hooks/useEvents';
+import { CalendarProps, Event, EventFormValues, EventMode } from '@/types/calendar';
 import { Form, Skeleton } from 'antd';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import dayjs from 'dayjs';
 import { useSession } from 'next-auth/react';
-import { CSSProperties, useCallback, useMemo, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -36,15 +37,19 @@ minTime.setHours(8, 0, 0); // 08:00
 const maxTime = new Date();
 maxTime.setHours(18, 0, 0); // 18:00
 
-export default function MyCalendar({ events: initEvent }: CalendarProps) {
+export default function MyCalendar({ }: CalendarProps) {
+  const { events, createEvent, updateEvent, deleteEvent, fetchEvents } = useEvents();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [events, setEvents] = useState<Event[]>(initEvent);
-  const [mode, setMode] = useState<'create' | 'edit'>('create');
+  const [mode, setMode] = useState<EventMode>('create');
   const [form] = Form.useForm<EventFormValues>();
   const { status, data: session } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const localizer = useMemo(() => dateFnsLocalizer({
     format,
@@ -86,17 +91,11 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
   const handleEventModification = useCallback(({ event, start, end }: { event: Event, start: string | Date, end: string | Date }) => {
     if (!isAdmin) return;
 
-    const roundedStart = roundToNearestThirty(dayjs(new Date(start))).toDate();
-    const roundedEnd = roundToNearestThirty(dayjs(new Date(end))).toDate();
+    const roundedStart = roundToNearestThirty(dayjs(new Date(start)));
+    const roundedEnd = roundToNearestThirty(dayjs(new Date(end)));
 
-    setEvents(prevEvents =>
-      prevEvents.map(existingEvent =>
-        existingEvent.id === event.id
-          ? { ...existingEvent, start: roundedStart, end: roundedEnd }
-          : existingEvent
-      )
-    );
-  }, [isAdmin, roundToNearestThirty]);
+    updateEvent(event.id, { ...event, start: roundedStart, end: roundedEnd });
+  }, [isAdmin, roundToNearestThirty, updateEvent]);
 
   const handleCancel = useCallback(() => {
     form.resetFields();
@@ -108,40 +107,19 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
 
   const handleDelete = useCallback(() => {
     if (selectedEvent) {
-      setEvents(prevEvents =>
-        prevEvents.filter(event => event.id !== selectedEvent.id)
-      );
+      deleteEvent(selectedEvent.id);
       handleCancel();
     }
-  }, [selectedEvent, handleCancel]);
+  }, [selectedEvent, handleCancel, deleteEvent]);
 
   const handleSubmit = useCallback((values: EventFormValues) => {
     if (mode === 'create') {
-      const newEvent: Event = {
-        id: crypto.randomUUID(),
-        title: values.title,
-        start: values.start.toDate(),
-        end: values.end.toDate(),
-        description: values.description,
-      };
-      setEvents(prevEvents => [...prevEvents, newEvent]);
-    } else {
-      setEvents(prevEvents =>
-        prevEvents.map(event =>
-          event.id === selectedEvent?.id
-            ? {
-              ...event,
-              title: values.title,
-              start: values.start.toDate(),
-              end: values.end.toDate(),
-              description: values.description,
-            }
-            : event
-        )
-      );
+      createEvent(values);
+    } else if (mode === 'edit' && selectedEvent) {
+      updateEvent(selectedEvent.id, values);
     }
     handleCancel();
-  }, [mode, selectedEvent, handleCancel]);
+  }, [mode, selectedEvent, handleCancel, createEvent, updateEvent]);
 
   if (status === 'loading') return <Skeleton />;
 

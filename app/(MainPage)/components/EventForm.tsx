@@ -10,11 +10,11 @@ interface EventFormProps {
   onFinish: (values: EventFormValues) => void;
 }
 
-export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProps) => {
-  console.log("🚀 ~ EventForm ~ mode:", { mode, initialValues })
-  const [events, setEvents] = useState(initialValues || []);
+export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => {
+  // console.log("🚀 ~ EventForm ~ mode:", { mode, initialValues })
+  const [event, setEvent] = useState(initialValues || {});
   useEffect(() => {
-    setEvents(initialValues || []);
+    setEvent(initialValues || {});
     form.setFieldsValue({
       title: initialValues?.title,
       start: initialValues?.start,
@@ -55,7 +55,7 @@ export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProp
       form={form}
       onFinish={onFinish}
       layout="vertical"
-      initialValues={events}
+      initialValues={event}
     >
       <Form.Item
         id='title'

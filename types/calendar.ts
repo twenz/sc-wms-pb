@@ -34,5 +34,5 @@ export interface EventFormProps {
 }
 
 export interface CalendarProps {
-  events: Event[];
+  events?: Event[];
 }
