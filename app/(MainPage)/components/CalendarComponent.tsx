@@ -1,14 +1,19 @@
 'use client';
 
 import { CalendarProps, Event, EventFormValues } from '@/types/calendar';
-import { Form, Modal, theme } from 'antd';
+import { Form, Skeleton, theme } from 'antd';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import dayjs from 'dayjs';
-import { CSSProperties, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { CSSProperties, useCallback, useMemo, useState } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { EventForm } from './EventForm';
+import { EventModal } from './EventModal';
+
+const DnDCalendar = withDragAndDrop<Event>(Calendar);
 
 const styles = {
   calendar: {
@@ -34,8 +39,12 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
   const { token } = theme.useToken();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>(initEvent);
+  const [mode, setMode] = useState<'create' | 'edit'>('create');
   const [form] = Form.useForm<EventFormValues>();
+  const { status, data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const localizer = useMemo(() => dateFnsLocalizer({
     format,
@@ -45,73 +54,140 @@ export default function MyCalendar({ events: initEvent }: CalendarProps) {
     locales: { 'en-US': enUS }
   }), []);
 
-  const handleSelectEvent = (event: Event) => {
-    // Handle event selection
-    console.log('Selected event:', event);
-  };
+  const roundToNearestThirty = useCallback((value: dayjs.Dayjs) => {
+    const minutes = value.minute();
+    const roundedMinutes = Math.round(minutes / 30) * 30;
+    return value.minute(roundedMinutes).second(0);
+  }, []);
 
-  const handleSelectSlot = (slotInfo: SlotInfo) => {
-    setSelectedSlot(slotInfo);
+  const handleSelectEvent = useCallback((event: Event) => {
+    if (!isAdmin) return;
+
+    setSelectedEvent(event);
+    setMode('edit');
+    form.setFieldsValue({
+      title: event.title,
+      start: dayjs(event.start),
+      end: dayjs(event.end),
+    });
     setIsModalOpen(true);
-  };
+  }, [isAdmin, form]);
 
-  const handleCreateEvent = async (values: EventFormValues) => {
-    const newEvent = {
-      id: crypto.randomUUID(),
-      title: values.title,
-      start: values.start.toDate(),
-      end: values.end.toDate(),
-    };
+  const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
+    if (!isAdmin) return;
 
-    setEvents((prevEvents) => [...prevEvents, newEvent]);
-    setIsModalOpen(false);
-    form.resetFields();
-  };
+    setSelectedSlot(slotInfo);
+    setMode('create');
+    setSelectedEvent(null);
+    setIsModalOpen(true);
+  }, [isAdmin]);
 
-  const handleCancel = () => {
+  const handleEventModification = useCallback(({ event, start, end }: { event: Event, start: string | Date, end: string | Date }) => {
+    if (!isAdmin) return;
+
+    const roundedStart = roundToNearestThirty(dayjs(new Date(start))).toDate();
+    const roundedEnd = roundToNearestThirty(dayjs(new Date(end))).toDate();
+
+    setEvents(prevEvents =>
+      prevEvents.map(existingEvent =>
+        existingEvent.id === event.id
+          ? { ...existingEvent, start: roundedStart, end: roundedEnd }
+          : existingEvent
+      )
+    );
+  }, [isAdmin, roundToNearestThirty]);
+
+  const handleCancel = useCallback(() => {
     form.resetFields();
     setSelectedSlot(null);
+    setSelectedEvent(null);
     setIsModalOpen(false);
-  };
+    setMode('create');
+  }, [form]);
+
+  const handleDelete = useCallback(() => {
+    if (selectedEvent) {
+      setEvents(prevEvents =>
+        prevEvents.filter(event => event.id !== selectedEvent.id)
+      );
+      handleCancel();
+    }
+  }, [selectedEvent, handleCancel]);
+
+  const handleSubmit = useCallback((values: EventFormValues) => {
+    if (mode === 'create') {
+      const newEvent = {
+        id: crypto.randomUUID(),
+        title: values.title,
+        start: values.start.toDate(),
+        end: values.end.toDate(),
+      };
+      setEvents(prevEvents => [...prevEvents, newEvent]);
+    } else {
+      setEvents(prevEvents =>
+        prevEvents.map(event =>
+          event.id === selectedEvent?.id
+            ? {
+              ...event,
+              title: values.title,
+              start: values.start.toDate(),
+              end: values.end.toDate(),
+            }
+            : event
+        )
+      );
+    }
+    handleCancel();
+  }, [mode, selectedEvent, handleCancel]);
+
+  if (status === 'loading') return <Skeleton />;
+  console.log("🚀 ~ MyCalendar ~ isAdmin:", isAdmin)
 
   return (
     <div style={styles.container}>
+      {!isAdmin && (
+        <div style={{ marginBottom: '1rem', color: token.colorTextSecondary }}>
+          View-only calendar. Contact an administrator for changes.
+        </div>
+      )}
       <div style={styles.calendar}>
-        <Calendar
+        <DnDCalendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
-          defaultView="month"
-          selectable
+          defaultView={isAdmin ? 'week' : 'month'}
+          selectable={isAdmin}
           onSelectEvent={handleSelectEvent}
           onSelectSlot={handleSelectSlot}
           style={{ height: '100%' }}
           views={['month', 'week', 'day']}
           min={minTime}
           max={maxTime}
+          draggableAccessor={() => isAdmin}
+          resizable={isAdmin}
+          resizableAccessor={() => isAdmin}
+          onEventDrop={handleEventModification}
+          onEventResize={handleEventModification}
+          tooltipAccessor={(event) => event.title}
+          step={30}
+          timeslots={2}
+          popup
         />
       </div>
 
-      <Modal
-        title={<span style={{ color: token.colorPrimary }}>Create Event</span>}
-        open={isModalOpen}
-        onCancel={handleCancel}
-        onOk={() => form.submit()}
-        maskClosable={false}
-        style={{ maxWidth: '600px' }}
-        destroyOnClose
-      >
-        <EventForm
+      {isAdmin && (
+        <EventModal
+          isOpen={isModalOpen}
+          mode={mode}
           form={form}
-          onFinish={handleCreateEvent}
-          initialValues={{
-            title: '',
-            start: selectedSlot ? dayjs(selectedSlot.start) : undefined,
-            end: selectedSlot ? dayjs(selectedSlot.end) : undefined
-          }}
+          selectedEvent={selectedEvent}
+          selectedSlot={selectedSlot}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+          onSubmit={handleSubmit}
         />
-      </Modal>
+      )}
     </div>
   );
 }

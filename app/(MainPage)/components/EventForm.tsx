@@ -1,23 +1,53 @@
-import { EventFormValues } from '@/types/calendar';
+'use client';
+import { EventFormValues, EventMode } from '@/types/calendar';
 import { DatePicker, Form, FormInstance, Input } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface EventFormProps {
-  form: FormInstance<EventFormValues>
+  mode: EventMode;
+  form: FormInstance<EventFormValues>;
   initialValues?: Partial<EventFormValues>;
   onFinish: (values: EventFormValues) => void;
 }
 
-export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => {
+export const EventForm = ({ mode, form, initialValues, onFinish }: EventFormProps) => {
+  console.log("🚀 ~ EventForm ~ mode:", mode)
+  const [events, setEvents] = useState(initialValues || []);
   useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue({
-        title: initialValues.title,
-        start: initialValues.start,
-        end: initialValues.end,
-      });
-    }
-  }, [initialValues, form]);
+    setEvents(initialValues || []);
+    form.setFieldsValue({
+      title: initialValues?.title,
+      start: initialValues?.start,
+      end: initialValues?.end,
+    });
+  }, [initialValues])
+  // Round minutes to nearest 30
+  // const roundToNearestThirty = (value: Dayjs) => {
+  //   const minutes = value.minute();
+  //   const roundedMinutes = Math.round(minutes / 30) * 30;
+  //   return value.minute(roundedMinutes).second(0);
+  // };
+
+  // Disable minutes that are not XX:00 or XX:30
+  const disabledMinutes = () =>
+    Array.from({ length: 60 }, (_, i) => i).filter(m => m % 30 !== 0);
+
+  // const handleTimeChange = (field: 'start' | 'end', value: Dayjs | null) => {
+  //   if (!value) return;
+
+  //   const roundedValue = roundToNearestThirty(value);
+
+  //   if (field === 'start') {
+  //     const currentEnd = form.getFieldValue('end');
+  //     form.setFieldsValue({
+  //       start: roundedValue,
+  //       end: !currentEnd ? roundedValue.add(30, 'minute') : currentEnd
+  //     });
+  //   } else {
+  //     console.log("🚀 ~ handleTimeChange ~ roundedValue:", field, roundedValue.toString())
+  //     // form.setFieldValue(field, roundedValue);
+  //   }
+  // };
 
   return (
     <Form
@@ -25,6 +55,7 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
       form={form}
       onFinish={onFinish}
       layout="vertical"
+      initialValues={events}
     >
       <Form.Item
         name="title"
@@ -40,10 +71,14 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
         rules={[{ required: true, message: 'Please select start time' }]}
       >
         <DatePicker
-          showTime
+          showTime={{
+            format: 'HH:mm',
+            minuteStep: 30,
+            disabledMinutes
+          }}
           format="YYYY-MM-DD HH:mm"
-          style={{ width: '100%', pointerEvents: 'none' }}
-          inputReadOnly
+          style={{ width: '100%' }}
+        // onChange={(value) => handleTimeChange('start', value)}
         />
       </Form.Item>
 
@@ -54,7 +89,7 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
           { required: true, message: 'Please select end time' },
           ({ getFieldValue }) => ({
             validator(_, value) {
-              if (!value || getFieldValue('start').isBefore(value)) {
+              if (!value || !getFieldValue('start') || getFieldValue('start').isBefore(value)) {
                 return Promise.resolve();
               }
               return Promise.reject(new Error('End time must be after start time'));
@@ -63,10 +98,14 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
         ]}
       >
         <DatePicker
-          showTime
+          showTime={{
+            format: 'HH:mm',
+            minuteStep: 30,
+            disabledMinutes
+          }}
           format="YYYY-MM-DD HH:mm"
-          style={{ width: '100%', pointerEvents: 'none' }}
-          inputReadOnly
+          style={{ width: '100%' }}
+        // onChange={(value) => handleTimeChange('end', value)}
         />
       </Form.Item>
     </Form>
