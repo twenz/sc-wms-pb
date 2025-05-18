@@ -1,9 +1,11 @@
 import { ApiError, apiHandler, checkAuth } from "@/libs/api-utils";
 import { prisma } from "@/libs/prisma";
 
+type Params = Promise<{ id: string }>
+
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   return apiHandler(async () => {
     await checkAuth();
@@ -18,7 +20,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   return apiHandler(async () => {
     await checkAuth();
@@ -40,12 +42,13 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   return apiHandler(async () => {
     await checkAuth();
+    const eventId = (await params).id;
     await prisma.event.delete({
-      where: { id: params.id },
+      where: { id: eventId },
     });
     return { message: "Event deleted successfully" };
   });

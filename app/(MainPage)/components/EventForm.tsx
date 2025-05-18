@@ -11,8 +11,9 @@ interface EventFormProps {
 }
 
 export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => {
-  // console.log("🚀 ~ EventForm ~ mode:", { mode, initialValues })
+  // Local state if required
   const [event, setEvent] = useState(initialValues || {});
+
   useEffect(() => {
     setEvent(initialValues || {});
     form.setFieldsValue({
@@ -20,34 +21,11 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
       start: initialValues?.start,
       end: initialValues?.end,
     });
-  }, [initialValues])
-  // Round minutes to nearest 30
-  // const roundToNearestThirty = (value: Dayjs) => {
-  //   const minutes = value.minute();
-  //   const roundedMinutes = Math.round(minutes / 30) * 30;
-  //   return value.minute(roundedMinutes).second(0);
-  // };
+  }, [form, initialValues]);
 
   // Disable minutes that are not XX:00 or XX:30
   const disabledMinutes = () =>
     Array.from({ length: 60 }, (_, i) => i).filter(m => m % 30 !== 0);
-
-  // const handleTimeChange = (field: 'start' | 'end', value: Dayjs | null) => {
-  //   if (!value) return;
-
-  //   const roundedValue = roundToNearestThirty(value);
-
-  //   if (field === 'start') {
-  //     const currentEnd = form.getFieldValue('end');
-  //     form.setFieldsValue({
-  //       start: roundedValue,
-  //       end: !currentEnd ? roundedValue.add(30, 'minute') : currentEnd
-  //     });
-  //   } else {
-  //     console.log("🚀 ~ handleTimeChange ~ roundedValue:", field, roundedValue.toString())
-  //     // form.setFieldValue(field, roundedValue);
-  //   }
-  // };
 
   return (
     <Form
@@ -76,11 +54,10 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
           showTime={{
             format: 'HH:mm',
             minuteStep: 30,
-            disabledMinutes
+            disabledMinutes,
           }}
           format="YYYY-MM-DD HH:mm"
           style={{ width: '100%' }}
-        // onChange={(value) => handleTimeChange('start', value)}
         />
       </Form.Item>
 
@@ -104,18 +81,19 @@ export const EventForm = ({ form, initialValues, onFinish }: EventFormProps) => 
           showTime={{
             format: 'HH:mm',
             minuteStep: 30,
-            disabledMinutes
+            disabledMinutes,
           }}
           format="YYYY-MM-DD HH:mm"
           style={{ width: '100%' }}
-        // onChange={(value) => handleTimeChange('end', value)}
         />
       </Form.Item>
+
       <Form.Item id='description' name='description' label='Event Description'>
         <Input.TextArea
           placeholder='Enter event description, max 256 characters'
           autoSize={{ minRows: 4, maxRows: 4 }}
-          maxLength={256} />
+          maxLength={256}
+        />
       </Form.Item>
     </Form>
   );
